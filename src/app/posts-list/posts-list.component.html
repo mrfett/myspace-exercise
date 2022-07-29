@@ -1,11 +1,13 @@
 <!-- <div class="post-component" [post]="this.testPost"></div> -->
-<div *ngIf="postListWithRotation$ | async as posts">
+<div *ngIf="postListWithRotation$ | async as post">
   <div
     class="post-component"
     [post]="post"
-    *ngFor="let post of posts"
     [ngStyle]="{'transform': ('rotate(' + post.rotation + 'deg)')}"
   ></div>
+</div>
+<div ngIf="existingPosts$ | async as numberList">
+  <!-- <div ngFor="let myNumber of numberList">{{myNumber}}</div> -->
 </div>
 <h3></h3>
 <button (click)="addPost(this.testPost)">Add</button>

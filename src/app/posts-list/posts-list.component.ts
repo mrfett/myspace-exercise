@@ -1,5 +1,5 @@
 import { Component, OnInit } from "@angular/core";
-import { BehaviorSubject } from "rxjs";
+import { BehaviorSubject, merge, of, ReplaySubject } from "rxjs";
 import { Post } from "../post";
 import { map } from "rxjs/operators";
 
@@ -15,45 +15,51 @@ export class PostsListComponent implements OnInit {
     postDate: new Date()
   };
 
-  postsSubject = new BehaviorSubject<Post[]>([
-    {
-      postTitle: "First Post!",
-      postText: "This is my first post.",
-      postDate: new Date("8-23-1978")
-    },
-    {
-      postTitle: "Second Post!",
-      postText: `I travel through time.
-      I can travel in all sorts of crazy ways, but I will take you back to something that happened over 10 years ago on a Tuesday morning.
-      You're going to need to shut your brain off.
-      Are you ready?
-      Alright, go to 1996.
-      I go into my first job at the Veejay Hotel in Baltimore, Maryland.`,
-      postDate: new Date("8-1-80")
-    }
-  ]);
+  existingPosts$ = of(1, 2, 3, 4);
+
+  existingPostsObserver = {
+    next: (x: number) => console.log("Observer got a next value: " + x),
+    error: (err: string) => console.error("Observer got an error: " + err),
+    complete: () => console.log("Observer got a complete notification")
+  };
+  newPostsSubject = new BehaviorSubject([]);
+  newPostsAction = this.newPostsSubject.asObservable();
+
+  postListTest$ = merge(this.existingPosts$, this.newPostsAction).subscribe();
+
+  postsSubject = new ReplaySubject();
   postList$ = this.postsSubject.asObservable();
 
   postListWithRotation$ = this.postList$.pipe(
-    map((rotatedPosts: []) =>
-      rotatedPosts.map((post: Post) => {
-        console.log("Post", post);
-        return {
-          ...post,
-          rotation: Math.random() * this.rotationScale - this.rotationScale / 2
-        };
-      })
-    )
+    map((rotatedPost: {}) => {
+      const newPostWithRotation = { ...rotatedPost, rotation: 5 };
+      return newPostWithRotation;
+    })
   );
 
   rotationScale = 14;
 
   addPost = (newPost: Post) => {
-    const newPosts = [...this.postsSubject.getValue(), newPost];
-    this.postsSubject.next(newPosts);
+    // const newPosts = [...this.postsSubject.getValue(), newPost];
+    this.postsSubject.next(newPost);
   };
 
-  // constructor() { }
+  constructor() {
+    this.existingPosts$.subscribe(this.existingPostsObserver);
+  }
 
-  ngOnInit(): void {}
+  ngOnInit(): void {
+    this.postsSubject.next([
+      {
+        postTitle: "Second Post!",
+        postText: "This is my second post.",
+        postDate: new Date("8-23-1978")
+      },
+      {
+        postTitle: "First Post!",
+        postText: "This is my first post.",
+        postDate: new Date("8-23-1978")
+      }
+    ]);
+  }
 }
