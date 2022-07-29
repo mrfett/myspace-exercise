@@ -1,0 +1,13 @@
+<h2>{{post.postTitle}}</h2>
+<h3 *ngIf="post.postDate; Else missingDate">
+  {{post.postDate.toLocaleDateString('en-us', { weekday:"long", year:"numeric",
+  month:"short", day:"numeric"})}}
+</h3>
+<h3>
+  {{ post.postDate.toLocaleTimeString('en-us', { hour: "numeric", minute:
+  "numeric", timeZoneName: "short" }) }}
+</h3>
+<ng-template #missingDate>No Date</ng-template>
+<div class="post-content">
+  <p>{{post.postText}}</p>
+</div>
